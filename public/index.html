@@ -38,7 +38,7 @@
 
       // Tải dữ liệu khi mở trang
       window.onload = async function() {
-        const response = await fetch('/inventory');
+        const response = await fetch('https://warehouse-app-seven-rosy.vercel.app/inventory');
         const data = await response.json();
         uploadedData = data;
         displayData(uploadedData);
@@ -60,7 +60,7 @@
         hot.addHook('afterChange', async function(changes, source) {
           if (source !== 'loadData') {
             uploadedData = hot.getData();
-            await fetch('/inventory', {
+            await fetch('https://warehouse-app-seven-rosy.vercel.app/inventory', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(uploadedData)
@@ -87,7 +87,7 @@
           return;
         }
 
-        const response = await fetch('/import', {
+        const response = await fetch('https://warehouse-app-seven-rosy.vercel.app/import', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ productName, quantity, note })
@@ -111,7 +111,7 @@
           return;
         }
 
-        const response = await fetch('/export', {
+        const response = await fetch('https://warehouse-app-seven-rosy.vercel.app/export', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ productName, quantity, note })
@@ -127,7 +127,7 @@
 
       async function checkAlerts() {
         if (!uploadedData) return;
-        const response = await fetch('/alert', {
+        const response = await fetch('https://warehouse-app-seven-rosy.vercel.app/alert', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(uploadedData)
