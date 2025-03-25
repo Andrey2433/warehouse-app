@@ -2,7 +2,19 @@ const express = require('express');
 const admin = require('firebase-admin');
 const nodemailer = require('nodemailer');
 const cors = require('cors');
+const fs = require('fs');
+const path = require('path');
 const app = express();
+
+console.log('Checking for public/index.html...');
+const indexPath = path.join(__dirname, 'public', 'index.html');
+fs.access(indexPath, fs.constants.F_OK, (err) => {
+  if (err) {
+    console.error('public/index.html does not exist:', err);
+  } else {
+    console.log('public/index.html exists at:', indexPath);
+  }
+});
 
 app.use(cors());
 app.use(express.json());
