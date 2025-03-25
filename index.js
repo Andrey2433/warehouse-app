@@ -143,12 +143,8 @@ app.post('/alert', async (req, res) => {
   }
 });
 
-// Fallback to serve index.html for any unmatched routes
+// Favicon routes
 app.get('/favicon.ico', (req, res) => res.status(204).end());
 app.get('/favicon.png', (req, res) => res.status(204).end());
-
-app.get('*', (req, res) => {
-  res.sendFile('index.html', { root: 'public' });
-});
 
 app.listen(process.env.PORT || 3000, () => console.log('Server running'));
