@@ -143,4 +143,9 @@ app.post('/alert', async (req, res) => {
   }
 });
 
+// Fallback to serve index.html for any unmatched routes
+app.get('*', (req, res) => {
+  res.sendFile('index.html', { root: 'public' });
+});
+
 app.listen(process.env.PORT || 3000, () => console.log('Server running'));
