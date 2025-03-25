@@ -8,7 +8,7 @@ app.use(cors());
 app.use(express.json());
 
 // Initialize Firebase
-const serviceAccount = require('./warehouseapp-firebase-adminsdk.json');
+const serviceAccount = JSON.parse(process.env.FIREBASE_CREDENTIALS);
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
 });
