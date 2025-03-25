@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Quản lý kho hàng</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/handsontable@latest/dist/handsontable.full.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/handsontable@latest/dist/handsontable.full.min.js"></script>
+    <style>
+      #dataTable { width: 90%; margin-top: 20px; }
+      button { margin: 5px; }
+      .ht_master .wtHolder { overflow-x: auto; }
+      .form-container { margin: 10px 0; }
+      .form-container input, .form-container button { margin: 5px; }
+    </style>
+  </head>
+  <body>
+    <h2>Quản lý kho hàng</h2>
+    <div class="form-container">
+      <h3>Nhập kho</h3>
+      <input type="text" id="importProduct" placeholder="Tên sản phẩm">
+      <input type="number" id="importQuantity" placeholder="Số lượng">
+      <input type="text" id="importNote" placeholder="Ghi chú">
+      <button onclick="importInventory()">Nhập kho</button>
+    </div>
+    <div class="form-container">
+      <h3>Xuất kho</h3>
+      <input type="text" id="exportProduct" placeholder="Tên sản phẩm">
+      <input type="number" id="exportQuantity" placeholder="Số lượng">
+      <input type="text" id="exportNote" placeholder="Ghi chú">
+      <button onclick="exportInventory()">Xuất kho</button>
+    </div>
+    <button onclick="checkAlerts()">Kiểm tra cảnh báo</button>
+    <div id="dataTable"></div>
+    <div id="result"></div>
+
+    <script>
+      let uploadedData = null;
+      let hot = null;
+
+      // Tải dữ liệu khi mở trang
+      window.onload = async function() {
+        const response = await fetch('/inventory');
+        const data = await response.json();
+        uploadedData = data;
+        displayData(uploadedData);
+      };
+
+      function displayData(data) {
+        var container = document.getElementById('dataTable');
+        hot = new Handsontable(container, {
+          data: data,
+          colHeaders: true,
+          rowHeaders: true,
+          contextMenu: true,
+          minSpareRows: 1,
+          minSpareCols: 1,
+          stretchH: 'all',
+          licenseKey: 'non-commercial-and-evaluation'
+        });
+
+        hot.addHook('afterChange', async function(changes, source) {
+          if (source !== 'loadData') {
+            uploadedData = hot.getData();
+            await fetch('/inventory', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(uploadedData)
+            });
+          }
+        });
+
+        hot.addHook('afterCreateCol', function(index, amount) {
+          var newHeaders = hot.getColHeader();
+          for (var i = index; i < index + amount; i++) {
+            newHeaders[i] = 'Cột mới ' + (i + 1);
+          }
+          hot.updateSettings({ colHeaders: newHeaders });
+        });
+      }
+
+      async function importInventory() {
+        const productName = document.getElementById('importProduct').value;
+        const quantity = document.getElementById('importQuantity').value;
+        const note = document.getElementById('importNote').value;
+
+        if (!productName || !quantity) {
+          alert('Vui lòng nhập tên sản phẩm và số lượng!');
+          return;
+        }
+
+        const response = await fetch('/import', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ productName, quantity, note })
+        });
+        const updatedData = await response.json();
+        uploadedData = updatedData;
+        hot.loadData(uploadedData);
+        alert('Đã nhập kho thành công!');
+        document.getElementById('importProduct').value = '';
+        document.getElementById('importQuantity').value = '';
+        document.getElementById('importNote').value = '';
+      }
+
+      async function exportInventory() {
+        const productName = document.getElementById('exportProduct').value;
+        const quantity = document.getElementById('exportQuantity').value;
+        const note = document.getElementById('exportNote').value;
+
+        if (!productName || !quantity) {
+          alert('Vui lòng nhập tên sản phẩm và số lượng!');
+          return;
+        }
+
+        const response = await fetch('/export', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ productName, quantity, note })
+        });
+        const updatedData = await response.json();
+        uploadedData = updatedData;
+        hot.loadData(uploadedData);
+        alert('Đã xuất kho thành công!');
+        document.getElementById('exportProduct').value = '';
+        document.getElementById('exportQuantity').value = '';
+        document.getElementById('exportNote').value = '';
+      }
+
+      async function checkAlerts() {
+        if (!uploadedData) return;
+        const response = await fetch('/alert', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(uploadedData)
+        });
+        const alerts = await response.json();
+        document.getElementById('result').innerHTML = '<h3>Cảnh báo:</h3><ul>' + 
+          alerts.map(a => '<li>' + a + '</li>').join('') + '</ul>';
+      }
+    </script>
+  </body>
+</html>
