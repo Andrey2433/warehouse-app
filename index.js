@@ -7,6 +7,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Serve static files
+app.use(express.static('public'));
+
 // Initialize Firebase
 const serviceAccount = JSON.parse(process.env.FIREBASE_CREDENTIALS);
 admin.initializeApp({
@@ -22,9 +25,6 @@ const transporter = nodemailer.createTransport({
     pass: 'esiz prud gjta aokm' // Replace with your App Password
   }
 });
-
-// Serve static files
-app.use(express.static('public'));
 
 // Get inventory data
 app.get('/inventory', async (req, res) => {
