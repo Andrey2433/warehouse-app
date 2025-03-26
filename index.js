@@ -23,7 +23,14 @@ app.use(express.json());
 app.use(express.static('public'));
 
 // Initialize Firebase
-const serviceAccount = JSON.parse(process.env.FIREBASE_CREDENTIALS);
+let serviceAccount;
+try {
+  serviceAccount = JSON.parse(process.env.FIREBASE_CREDENTIALS);
+} catch (error) {
+  console.error('Failed to parse FIREBASE_CREDENTIALS:', error);
+  throw new Error('Invalid FIREBASE_CREDENTIALS environment variable');
+}
+
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
 });
