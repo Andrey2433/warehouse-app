@@ -41,13 +41,18 @@ const transporter = nodemailer.createTransport({
 // Get inventory data
 app.get('/inventory', async (req, res) => {
   try {
+    console.log('Fetching inventory data...');
     const snapshot = await db.collection('inventory').doc('main').get();
+    console.log('Snapshot exists:', snapshot.exists);
     if (!snapshot.exists) {
+      console.log('No inventory data found, returning default table');
       return res.json([['ID', 'Product Name', 'Product Code', 'Serial Number', 'Unit', 'Quantity', 'Note', 'Destroyed']]);
     }
     const data = snapshot.data().data;
+    console.log('Inventory data:', data);
     res.json(data);
   } catch (error) {
+    console.error('Error in /inventory:', error);
     res.status(500).json({ error: error.message });
   }
 });
