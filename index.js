@@ -26,14 +26,22 @@ app.use(express.static('public'));
 let serviceAccount;
 try {
   serviceAccount = JSON.parse(process.env.FIREBASE_CREDENTIALS);
+  console.log('FIREBASE_CREDENTIALS parsed successfully. Project ID:', serviceAccount.project_id);
 } catch (error) {
   console.error('Failed to parse FIREBASE_CREDENTIALS:', error);
   throw new Error('Invalid FIREBASE_CREDENTIALS environment variable');
 }
 
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount)
-});
+try {
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount)
+  });
+  console.log('Firebase Admin SDK initialized successfully');
+} catch (error) {
+  console.error('Failed to initialize Firebase Admin SDK:', error);
+  throw new Error('Firebase initialization failed');
+}
+
 const db = admin.firestore();
 
 // Configure email sending via Gmail
